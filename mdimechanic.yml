@@ -1,20 +1,33 @@
-code_name: 'UNKNOWN'
+code_name: 'Tinker'
 docker:
-  image_name: 'mdiengine'
+  image_name: 'mdi/tinker'
 
   build_image:
-    - echo "Insert commands to build the environment for the engine here"
-    - echo "This will often include using apt-get or pip to install dependencies"
+    - apt-get update
+    - apt-get install -y git
+    - pip install cmake
 
   build_engine:
-    - echo "Insert commands to build your engine code here"
+    - |
+      if [ ! -d "build/tinker" ]; then
+        git clone https://github.com/MolSSI-MDI/Tinker.git --branch mdi build/tinker
+      fi
+    - cd build/tinker/dev
+    - ./full_build.sh
 
   validate_engine:
-    - echo "Insert code that will confirm that your code has been built successfully"
-    - exit 1
+    # Confirm that the engine's executable exists
+    - ENGINE_EXECUTABLE="build/tinker/build/tinker/source/dynamic.x"
+    - |
+      if test -f "$ENGINE_EXECUTABLE"; then
+        echo "$ENGINE_EXECUTABLE exists"
+      else
+        echo "Could not find engine executable: $ENGINE_EXECUTABLE"
+        exit 1
+      fi
 
 engine_tests:
   # Provide at least one example input that can be used to test your code's MDI functionality
-  - script:
-      - echo "Insert commands to run an example calculation here"
-      - exit 1
+  script:
+    - echo "Insert commands to run an example calculation here"
+    - exit 1
