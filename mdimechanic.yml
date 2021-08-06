@@ -29,5 +29,6 @@ docker:
 engine_tests:
   # Provide at least one example input that can be used to test your code's MDI functionality
   script:
-    - echo "Insert commands to run an example calculation here"
-    - exit 1
+    - cd tests/water
+    - cp ../../build/tinker/build/tinker/params/amoebabio18.prm .
+    - ../../build/tinker/build/tinker/source/dynamic.x tinker.in amoebabio18.prm -k tinker.key -mdi "${MDI_OPTIONS}" 1000 1.0 10.0 2 298.0 778.0 > tinker.out
