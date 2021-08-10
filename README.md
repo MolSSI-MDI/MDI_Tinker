@@ -42,10 +42,10 @@ Supported commands are indicated in green, while unsupported commands are indica
 | ------------- | ------------- | ------------- | ------------- |
 | &lt;@ | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) |
 | &lt;CELL | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) |
-| &lt;CELL_DISPL | ![command](report/badges/box-lightgray.svg) | ![command](report/badges/box-lightgray.svg) | ![command](report/badges/box-lightgray.svg) |
-| &lt;CHARGES | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-lightgray.svg) | ![command](report/badges/box-brightgreen.svg) |
+| &lt;CELL_DISPL | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) |
+| &lt;CHARGES | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) |
 | &lt;COORDS | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) |
-| &lt;DIMENSIONS | ![command](report/badges/box-lightgray.svg) | ![command](report/badges/box-lightgray.svg) | ![command](report/badges/box-lightgray.svg) |
+| &lt;DIMENSIONS | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-brightgreen.svg) |
 | &lt;ELEC_MULT | ![command](report/badges/box-lightgray.svg) | ![command](report/badges/box-lightgray.svg) | ![command](report/badges/box-lightgray.svg) |
 | &lt;ELEMENTS | ![command](report/badges/box-lightgray.svg) | ![command](report/badges/box-lightgray.svg) | ![command](report/badges/box-lightgray.svg) |
 | &lt;ENERGY | ![command](report/badges/box-lightgray.svg) | ![command](report/badges/box-brightgreen.svg) | ![command](report/badges/box-lightgray.svg) |
