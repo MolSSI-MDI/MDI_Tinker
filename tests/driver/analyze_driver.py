@@ -59,6 +59,10 @@ mdi.MDI_Send_Command("<ENERGY", comm)
 energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, comm)
 print("Energy: " + str(energy))
 
+mdi.MDI_Send_Command("<FORCES", comm)
+forces = mdi.MDI_Recv(3*natoms, mdi.MDI_DOUBLE, comm)
+print("Forces: " + str(forces))
+
 print("CCC")
 
 mdi.MDI_Send_Command("EXIT", comm)

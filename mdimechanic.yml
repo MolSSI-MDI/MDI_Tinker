@@ -36,7 +36,7 @@ engine_tests:
     - ../../build/tinker/build/tinker/source/dynamic.x tinker.in amoebabio18.prm -k tinker.key -mdi "${MDI_OPTIONS}" 1000 1.0 10.0 2 298.0 778.0 > tinker.out
 
     # Run the analyze.x code
-    #- ../../build/tinker/build/tinker/source/analyze.x tinker.in amoebabio18.prm -k tinker.key -mdi "${MDI_OPTIONS}" GE > tinker.out
+    #- ../../build/tinker/build/tinker/source/analyze.x tinker.in amoebabio18.prm -k tinker.key -mdi "${MDI_OPTIONS}" GEV > tinker.out
 
 
 test_drivers:
