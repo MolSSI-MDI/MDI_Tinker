@@ -31,11 +31,21 @@ engine_tests:
   script:
     - cd tests/water
     - cp ../../build/tinker/build/tinker/params/amoebabio18.prm .
+
+    # Run the dynamic.x code
     - ../../build/tinker/build/tinker/source/dynamic.x tinker.in amoebabio18.prm -k tinker.key -mdi "${MDI_OPTIONS}" 1000 1.0 10.0 2 298.0 778.0 > tinker.out
+
+    # Run the analyze.x code
+    #- ../../build/tinker/build/tinker/source/analyze.x tinker.in amoebabio18.prm -k tinker.key -mdi "${MDI_OPTIONS}" GE > tinker.out
 
 
 test_drivers:
-  test_driver:
+  dynamic_driver:
     script:
       - cd tests/driver
       - python driver.py -mdi "-role DRIVER -name driver -method TCP -port 8021"
+
+  analyze_driver:
+    script:
+      - cd tests/driver
+      - python analyze_driver.py -mdi "-role DRIVER -name driver -method TCP -port 8021"
