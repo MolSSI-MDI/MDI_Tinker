@@ -4,13 +4,13 @@ docker:
 
   build_image:
     - apt-get update
-    - apt-get install -y git
+    - apt-get install -y git vim
     - pip install cmake
 
   build_engine:
     - |
       if [ ! -d "build/tinker" ]; then
-        git clone https://github.com/MolSSI-MDI/Tinker.git --branch mdi build/tinker
+        git clone https://github.com/MolSSI-MDI/Tinker.git --branch mdi-rebase build/tinker
       fi
     - cd build/tinker/dev
     - ./full_build.sh
