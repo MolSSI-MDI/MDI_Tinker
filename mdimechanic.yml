@@ -14,6 +14,7 @@ docker:
       fi
     - cd build/tinker/dev
     - ./full_build.sh
+    #- ./rebuild.sh
 
   validate_engine:
     # Confirm that the engine's executable exists
@@ -29,14 +30,37 @@ docker:
 engine_tests:
   # Provide at least one example input that can be used to test your code's MDI functionality
   script:
-    - cd tests/water
-    - cp ../../build/tinker/build/tinker/params/amoebabio18.prm .
+    #- cd tests/water
+    #- cp ../../build/tinker/build/tinker/params/amoebabio18.prm .
 
     # Run the dynamic.x code
-    - ../../build/tinker/build/tinker/source/dynamic.x tinker.in amoebabio18.prm -k tinker.key -mdi "${MDI_OPTIONS}" 1000 1.0 10.0 2 298.0 778.0 > tinker.out
+    #- ../../build/tinker/build/tinker/source/dynamic.x tinker.in amoebabio18.prm -k tinker.key -mdi "${MDI_OPTIONS}" 1000 1.0 10.0 2 298.0 778.0 > tinker.out
 
     # Run the analyze.x code
     #- ../../build/tinker/build/tinker/source/analyze.x tinker.in amoebabio18.prm -k tinker.key -mdi "${MDI_OPTIONS}" GEV > tinker.out
+
+    - cd tests/poltest
+    - ../../build/tinker/build/tinker/source/analyze.x tinker.in amoebabio18.prm -k analyze1.key -mdi "${MDI_OPTIONS}" E > tinker.out
+
+
+run_scripts:
+  test:
+    containers:
+      container1:
+        image: 'mdi/tinker'
+        script:
+          - cd tests/polarize
+          - ../../build/tinker/build/tinker/source/analyze.x box.xyz amoebabio18.prm -k box.key E > box.out
+          
+run_scripts:
+  analyze2:
+    containers:
+      container1:
+        image: 'mdi/tinker'
+        script:
+          - cd tests/polarize
+          - ../../build/tinker/build/tinker/source/analyze.x box.xyz amoebabio18.prm -k analyze2.key E > analyze2.out
+
 
 
 test_drivers:
@@ -49,3 +73,10 @@ test_drivers:
     script:
       - cd tests/driver
       - python analyze_driver.py -mdi "-role DRIVER -name driver -method TCP -port 8021"
+
+  poltest:
+    script:
+      - cd tests/poltest
+      - python driver.py -mdi "-role DRIVER -name driver -method TCP -port 8021"
+
+
