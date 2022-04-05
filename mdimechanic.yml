@@ -13,8 +13,8 @@ docker:
         git clone https://github.com/MolSSI-MDI/Tinker.git --branch mdi-rebase build/tinker
       fi
     - cd build/tinker/dev
-    - ./full_build.sh
-    #- ./rebuild.sh
+    #- ./full_build.sh
+    - ./rebuild.sh
 
   validate_engine:
     # Confirm that the engine's executable exists
@@ -40,7 +40,7 @@ engine_tests:
     #- ../../build/tinker/build/tinker/source/analyze.x tinker.in amoebabio18.prm -k tinker.key -mdi "${MDI_OPTIONS}" GEV > tinker.out
 
     - cd tests/poltest
-    - ../../build/tinker/build/tinker/source/analyze.x tinker.in amoebabio18.prm -k analyze1.key -mdi "${MDI_OPTIONS}" E > tinker.out
+    - ../../build/tinker/build/tinker/source/analyze.x tinker.in amoebabio18.prm -k simple.key -mdi "${MDI_OPTIONS}" E > tinker.out
 
 
 run_scripts:

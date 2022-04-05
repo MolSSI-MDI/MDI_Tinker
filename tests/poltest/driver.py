@@ -17,100 +17,121 @@ while iarg < len(sys.argv):
 
     iarg += 1
 
-# Connect to the engine
-comm = mdi.MDI_Accept_Communicator()
 
-# Get the name of the engine, which will be checked and verified at the end
-mdi.MDI_Send_Command("<NAME", comm)
-initial_name = mdi.MDI_Recv(mdi.MDI_NAME_LENGTH, mdi.MDI_CHAR, comm)
+class MDIDriver:
 
-# Verify that the engine is still responsive
-mdi.MDI_Send_Command("<NAME", comm)
-final_name = mdi.MDI_Recv(mdi.MDI_NAME_LENGTH, mdi.MDI_CHAR, comm)
-assert initial_name == final_name
-print("Engine name: " + str(final_name))
-
-mdi.MDI_Send_Command("<NATOMS", comm)
-natoms = mdi.MDI_Recv(1, mdi.MDI_INT, comm)
-print("NAtoms: " + str(natoms))
-
-#mdi.MDI_Send_Command("<ENERGY", comm)
-#energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, comm)
-#print("Energy1: " + str(energy))
-
-#mdi.MDI_Send_Command("<ENERGY", comm)
-#energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, comm)
-#print("Energy2: " + str(energy))
-
-#mdi.MDI_Send_Command("<FORCES", comm)
-#forces = mdi.MDI_Recv(3*natoms, mdi.MDI_DOUBLE, comm)
-##print("Forces: " + str(forces))
-
-#mdi.MDI_Send_Command("<POLEDIMS", comm)
-#polardim = mdi.MDI_Recv(1, mdi.MDI_INT, comm)
-#print("Polardim: " + str(polardim))
+    def __init__(self):
+        # Connect to the engine
+        self.comm = mdi.MDI_Accept_Communicator()
 
 
-# Get the charges
-mdi.MDI_Send_Command("<CHARGES", comm)
-charges = mdi.MDI_Recv(natoms, mdi.MDI_DOUBLE, comm)
-#print("Charges: " + str(charges))
+        # Number of atoms in the system
+        self.natoms = 0
+
+        # Flag whether to compute polarization contribution to the energy
+        self.polarize = 0
+        
+        # The current multipoles of the system
+        self.multipoles = None
+
+        # The current polarities of the system
+        self.polarities = None
 
 
-# Get the polarizabilities
-#mdi.MDI_Send_Command("<POLARITIES", comm)
-#polarities = mdi.MDI_Recv(natoms, mdi.MDI_DOUBLE, comm)
-#print("Polarities: " + str(polarities))
+    def set_polar(self, do_polarize):
 
-# Get the multipoles
-mdi.MDI_Send_Command("<MULTIPOLES", comm)
-multipoles = mdi.MDI_Recv(9*natoms, mdi.MDI_DOUBLE, comm)
-for iatom in range(natoms):
-    print("Multipoles " + str(iatom) + ":" + str(multipoles[9*(iatom-1):9*(iatom)]))
-
-do_polarize = True
-if do_polarize:
-
-    multipoles[9*(328-1)] = -0.84608
-    multipoles[9*(329-1)] = 0.37959
-    multipoles[9*(330-1)] = 0.41834
-    multipoles[9*(1165-1)] = -0.73451
-    multipoles[9*(1166-1)] = 0.40495
-    multipoles[9*(1167-1)] = 0.37771
-
-    polarize = 1
-
-else:
-
-    multipoles[9*(328-1)] = 0.0
-    multipoles[9*(329-1)] = 0.0
-    multipoles[9*(330-1)] = 0.0
-    multipoles[9*(1165-1)] = 0.0
-    multipoles[9*(1166-1)] = 0.0
-    multipoles[9*(1167-1)] = 0.0
-
-    polarize = 0
-
-# Send the multipoles
-mdi.MDI_Send_Command(">MULTIPOLES", comm)
-mdi.MDI_Send(multipoles, 9*natoms, mdi.MDI_DOUBLE, comm)
-
-mdi.MDI_Send_Command(">POLARIZE", comm)
-mdi.MDI_Send(polarize, 1, mdi.MDI_INT, comm)
-
-##polarities[0] += 0.1
-#mdi.MDI_Send_Command(">POLARITIES", comm)
-#mdi.MDI_Send(polarities, natoms, mdi.MDI_DOUBLE, comm)
-
-##multipoles[6] += 0.1
-#mdi.MDI_Send_Command(">MULTIPOLES", comm)
-#mdi.MDI_Send(multipoles, 9*natoms, mdi.MDI_DOUBLE, comm)
-
-mdi.MDI_Send_Command("<ENERGY", comm)
-energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, comm)
-print("Energy3: " + str(energy))
+        atoms_to_zero = [328, 329, 330, 1165, 1166, 1167] 
 
 
-print("CCC")
+        # Set the polarities of the QM atoms to zero
+        for iatom in atoms_to_zero:
+            self.polarities[iatom-1] = 0.0
 
-mdi.MDI_Send_Command("EXIT", comm)
+
+        if do_polarize:
+
+            self.polarize = 1
+
+            self.multipoles[9*(328-1)] = -0.84608
+            self.multipoles[9*(329-1)] = 0.37959
+            self.multipoles[9*(330-1)] = 0.41834
+            self.multipoles[9*(1165-1)] = -0.73451
+            self.multipoles[9*(1166-1)] = 0.40495
+            self.multipoles[9*(1167-1)] = 0.37771
+
+            # Zero all components of the multipoles on a selected group of atoms, 
+            # except for the monopoles
+              
+            for iatom in atoms_to_zero:
+                for i in range(1, 9):
+                    self.multipoles[9*(iatom-1)+i] = 0.0
+
+
+        else:
+
+            self.polarize = 0
+
+            # Zero the multipoles on the QM atoms
+            for iatom in atoms_to_zero:
+                for i in range(9):
+                    self.multipoles[9*(iatom-1)+i] = 0.0
+
+
+        # Send the multipoles to the engine
+        mdi.MDI_Send_Command(">MULTIPOLES", self.comm)
+        mdi.MDI_Send(self.multipoles, 9*self.natoms, mdi.MDI_DOUBLE, self.comm)
+
+        # Send the polarize flag to the engine
+        mdi.MDI_Send_Command(">POLARIZE", self.comm)
+        mdi.MDI_Send(self.polarize, 1, mdi.MDI_INT, self.comm)
+        
+        # Send the polarities to the engine
+        mdi.MDI_Send_Command(">POLARITIES", self.comm)
+        mdi.MDI_Send(self.polarities, self.natoms, mdi.MDI_DOUBLE, self.comm)
+
+    def run(self):
+
+        # Get the name of the engine, which will be checked and verified at the end
+        mdi.MDI_Send_Command("<NAME", self.comm)
+        name = mdi.MDI_Recv(mdi.MDI_NAME_LENGTH, mdi.MDI_CHAR, self.comm)
+        print("Engine name: " + str(name))
+
+        mdi.MDI_Send_Command("<NATOMS", self.comm)
+        self.natoms = mdi.MDI_Recv(1, mdi.MDI_INT, self.comm)
+        print("NAtoms: " + str(self.natoms))
+
+        # Get the multipoles
+        mdi.MDI_Send_Command("<MULTIPOLES", self.comm)
+        self.multipoles = mdi.MDI_Recv(9*self.natoms, mdi.MDI_DOUBLE, self.comm)
+        #for iatom in range(self.natoms):
+        #    print("Multipoles " + str(iatom) + ":" + str(self.multipoles[9*(iatom-1):9*(iatom)]))
+
+        # Get the polarities
+        mdi.MDI_Send_Command("<POLARITIES", self.comm)
+        self.polarities = mdi.MDI_Recv(self.natoms, mdi.MDI_DOUBLE, self.comm)
+        for iatom in range(self.natoms):
+            print("Polarities " + str(iatom) + ":" + str(self.polarities[iatom]))
+
+
+        self.set_polar(False)
+
+
+
+        mdi.MDI_Send_Command("<ENERGY", self.comm)
+        energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, self.comm)
+        print("Energy1: " + str(energy))
+
+        self.set_polar(True)
+
+
+
+        mdi.MDI_Send_Command("<ENERGY", self.comm)
+        energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, self.comm)
+        print("Energy2: " + str(energy))
+
+        mdi.MDI_Send_Command("EXIT", self.comm)
+
+
+
+driver = MDIDriver()
+driver.run()
