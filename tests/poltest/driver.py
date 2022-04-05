@@ -98,7 +98,7 @@ class MDIDriver:
 
         mdi.MDI_Send_Command("<NATOMS", self.comm)
         self.natoms = mdi.MDI_Recv(1, mdi.MDI_INT, self.comm)
-        print("NAtoms: " + str(self.natoms))
+        print("Number of atoms: " + str(self.natoms))
 
         # Get the multipoles
         mdi.MDI_Send_Command("<MULTIPOLES", self.comm)
@@ -109,25 +109,24 @@ class MDIDriver:
         # Get the polarities
         mdi.MDI_Send_Command("<POLARITIES", self.comm)
         self.polarities = mdi.MDI_Recv(self.natoms, mdi.MDI_DOUBLE, self.comm)
-        for iatom in range(self.natoms):
-            print("Polarities " + str(iatom) + ":" + str(self.polarities[iatom]))
+        #for iatom in range(self.natoms):
+        #    print("Polarities " + str(iatom) + ":" + str(self.polarities[iatom]))
 
-
+        # Turn polarization off
         self.set_polar(False)
 
-
-
+        # Get the energy of the system
         mdi.MDI_Send_Command("<ENERGY", self.comm)
         energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, self.comm)
-        print("Energy1: " + str(energy))
+        print("Energy without polarization: " + str(energy))
 
+        # Turn polarization on
         self.set_polar(True)
 
-
-
+        # Get the energy of the system
         mdi.MDI_Send_Command("<ENERGY", self.comm)
         energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, self.comm)
-        print("Energy2: " + str(energy))
+        print("Energy with polarization: " + str(energy))
 
         mdi.MDI_Send_Command("EXIT", self.comm)
 
