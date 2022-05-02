@@ -78,36 +78,44 @@ class MDIDriver:
 
 
         # Send the multipoles to the engine
-        mdi.MDI_Send_Command(">MULTIPOLES", self.comm)
+        mdi.MDI_Send_command(">MULTIPOLES", self.comm)
         mdi.MDI_Send(self.multipoles, 9*self.natoms, mdi.MDI_DOUBLE, self.comm)
 
         # Send the polarize flag to the engine
-        mdi.MDI_Send_Command(">POLARIZE", self.comm)
+        mdi.MDI_Send_command(">POLARIZE", self.comm)
         mdi.MDI_Send(self.polarize, 1, mdi.MDI_INT, self.comm)
         
         # Send the polarities to the engine
-        mdi.MDI_Send_Command(">POLARITIES", self.comm)
+        mdi.MDI_Send_command(">POLARITIES", self.comm)
         mdi.MDI_Send(self.polarities, self.natoms, mdi.MDI_DOUBLE, self.comm)
+
+        # Send the list of active atoms to the engine
+        active = [ 1 for iatom in range(self.natoms) ]
+        for iatom in atoms_to_zero:
+            active[iatom-1] = 0
+        mdi.MDI_Send_command(">ACTIVE", self.comm)
+        mdi.MDI_Send(active, self.natoms, mdi.MDI_INT, self.comm)
+
 
     def run(self):
 
         # Get the name of the engine, which will be checked and verified at the end
-        mdi.MDI_Send_Command("<NAME", self.comm)
+        mdi.MDI_Send_command("<NAME", self.comm)
         name = mdi.MDI_Recv(mdi.MDI_NAME_LENGTH, mdi.MDI_CHAR, self.comm)
         print("Engine name: " + str(name))
 
-        mdi.MDI_Send_Command("<NATOMS", self.comm)
+        mdi.MDI_Send_command("<NATOMS", self.comm)
         self.natoms = mdi.MDI_Recv(1, mdi.MDI_INT, self.comm)
         print("Number of atoms: " + str(self.natoms))
 
         # Get the multipoles
-        mdi.MDI_Send_Command("<MULTIPOLES", self.comm)
+        mdi.MDI_Send_command("<MULTIPOLES", self.comm)
         self.multipoles = mdi.MDI_Recv(9*self.natoms, mdi.MDI_DOUBLE, self.comm)
         #for iatom in range(self.natoms):
         #    print("Multipoles " + str(iatom) + ":" + str(self.multipoles[9*(iatom-1):9*(iatom)]))
 
         # Get the polarities
-        mdi.MDI_Send_Command("<POLARITIES", self.comm)
+        mdi.MDI_Send_command("<POLARITIES", self.comm)
         self.polarities = mdi.MDI_Recv(self.natoms, mdi.MDI_DOUBLE, self.comm)
         #for iatom in range(self.natoms):
         #    print("Polarities " + str(iatom) + ":" + str(self.polarities[iatom]))
@@ -116,7 +124,7 @@ class MDIDriver:
         self.set_polar(False)
 
         # Get the energy of the system
-        mdi.MDI_Send_Command("<ENERGY", self.comm)
+        mdi.MDI_Send_command("<ENERGY", self.comm)
         energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, self.comm)
         print("Energy without polarization: " + str(energy))
 
@@ -124,9 +132,49 @@ class MDIDriver:
         self.set_polar(True)
 
         # Get the energy of the system
-        mdi.MDI_Send_Command("<ENERGY", self.comm)
+        mdi.MDI_Send_command("<ENERGY", self.comm)
         energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, self.comm)
         print("Energy with polarization: " + str(energy))
+
+        # Turn off the Ewald flag
+        ewald_flag = 0
+        mdi.MDI_Send_command(">EWALD", self.comm)
+        mdi.MDI_Send(ewald_flag, 1, mdi.MDI_INT, self.comm)
+        
+        # Turn polarization off
+        self.set_polar(False)
+
+        mdi.MDI_Send_command("<ENERGY", self.comm)
+        energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, self.comm)
+        print("Energy without polarization and without Ewald: " + str(energy))
+        
+        # Turn polarization on
+        self.set_polar(True)
+
+        # Get the energy of the system
+        mdi.MDI_Send_command("<ENERGY", self.comm)
+        energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, self.comm)
+        print("Energy with polarization and without Ewald: " + str(energy))
+        
+        # Turn on the Ewald flag
+        ewald_flag = 1
+        mdi.MDI_Send_command(">EWALD", self.comm)
+        mdi.MDI_Send(ewald_flag, 1, mdi.MDI_INT, self.comm)
+
+        # Turn polarization off
+        self.set_polar(False)
+
+        mdi.MDI_Send_command("<ENERGY", self.comm)
+        energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, self.comm)
+        print("Energy without polarization and with Ewald: " + str(energy))
+
+        # Turn polarization on
+        self.set_polar(True)
+
+        # Get the energy of the system
+        mdi.MDI_Send_command("<ENERGY", self.comm)
+        energy = mdi.MDI_Recv(1, mdi.MDI_DOUBLE, self.comm)
+        print("Energy with polarization and with Ewald: " + str(energy))
 
         mdi.MDI_Send_Command("EXIT", self.comm)
 
